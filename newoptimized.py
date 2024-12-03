@@ -150,8 +150,13 @@ def test_scalability(iterations=5):
         for _ in range(iterations):
             graph = generate_graph(size)
             heuristic = euclidean_heuristic(size)
+            
+            # Measure Dijkstra's performance
+            start_time = time.perf_counter()
+            dijkstra(graph, 0)
+            times["Dijkstra"].append(time.perf_counter() - start_time)
+            
             for algo, func in [
-                ("Dijkstra", lambda: dijkstra(graph, 0)),
                 ("Bellman-Ford", lambda: bellman_ford(graph, 0)),
                 ("A*", lambda: a_star(graph, 0, size - 1, heuristic)),
                 ("Floyd-Warshall", lambda: floyd_warshall(graph, size)),
