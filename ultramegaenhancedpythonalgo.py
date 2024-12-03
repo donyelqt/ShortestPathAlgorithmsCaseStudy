@@ -114,6 +114,16 @@ def euclidean_heuristic(num_nodes):
     return heuristic
 
 # Testing and Validation
+def validate_dijkstra(graph):
+    expected = {0: 0, 1: 3, 2: 1, 3: 4}
+    output = dijkstra(graph, 0)  # Always use the fixed graph
+    assert output == expected, "Dijkstra failed validation!"
+
+def validate_bellman_ford(graph):
+    expected = {0: 0, 1: 3, 2: 1, 3: 4}
+    output = bellman_ford(graph, 0)  # Always use the fixed graph
+    assert output == expected, "Bellman-Ford failed validation!"
+
 def validate_algorithms():
     # Use a fixed graph for validation
     graph = {
@@ -122,13 +132,9 @@ def validate_algorithms():
         2: [(1, 2), (3, 5)],
         3: []
     }
-    expected = {
-        "Dijkstra": {0: 0, 1: 3, 2: 1, 3: 4},
-        "Bellman-Ford": {0: 0, 1: 3, 2: 1, 3: 4}
-    }
-    for algo, func in [("Dijkstra", dijkstra), ("Bellman-Ford", bellman_ford)]:
-        output = func(graph, 0)  # Always use the fixed graph
-        assert output == expected[algo], f"{algo} failed validation!"
+    
+    validate_dijkstra(graph)  # Validate Dijkstra
+    validate_bellman_ford(graph)  # Validate Bellman-Ford
 
     # Validate A*, Floyd-Warshall, and Johnson's algorithms
     heuristic = euclidean_heuristic(len(graph))
@@ -142,8 +148,8 @@ def validate_algorithms():
     assert johnson_result[0][3] == 4, "Johnson's algorithm failed validation!"
 
 # Scalability Testing
-def test_scalability(iterations=5):
-    sizes = [100, 200, 500]  # Removed 1000 for performance
+def test_scalability(iterations=1):
+    sizes = [100, 200, 300, 400, 500, 1000]  # Increased sizes for better visibility
     times = {algo: [] for algo in ["Dijkstra", "Bellman-Ford", "A*", "Floyd-Warshall", "Johnson's"]}
     
     for size in sizes:
@@ -151,7 +157,7 @@ def test_scalability(iterations=5):
             graph = generate_graph(size)
             heuristic = euclidean_heuristic(size)
             for algo, func in [
-                ("Dijkstra", lambda: dijkstra(graph, 0)),
+                ("Dijkstra", lambda: dijkstra(graph, 0)),  # Ensure Dijkstra is included
                 ("Bellman-Ford", lambda: bellman_ford(graph, 0)),
                 ("A*", lambda: a_star(graph, 0, size - 1, heuristic)),
                 ("Floyd-Warshall", lambda: floyd_warshall(graph, size)),
@@ -159,15 +165,22 @@ def test_scalability(iterations=5):
             ]:
                 start_time = time.perf_counter()
                 func()
-                times[algo].append(time.perf_counter() - start_time)
+                elapsed_time = time.perf_counter() - start_time
+                times[algo].append(elapsed_time)
+                print(f"{algo} for size {size}: {elapsed_time:.6f} seconds")  # Debug output
     
     # Average the times
     avg_times = {algo: [sum(times[algo][i:i + iterations]) / iterations for i in range(0, len(times[algo]), iterations)] for algo in times}
     
     for algo in avg_times:
-        plt.plot(sizes, avg_times[algo], label=algo)
+        print(f"Average time for {algo}: {avg_times[algo]}")  # Debug output for average times
+    
+    for algo in avg_times:
+        plt.plot(sizes, avg_times[algo], label=algo)  # Ensure Dijkstra is plotted
+    
     plt.xlabel("Number of Nodes")
     plt.ylabel("Average Time (seconds)")
+    plt.yscale('log')  # Use logarithmic scale for better visibility
     plt.legend()
     plt.title("Algorithm Scalability")
     plt.show()
@@ -180,8 +193,8 @@ def measure_memory(func, *args):
     tracemalloc.stop()
     return current, peak
 
-def analyze_memory_usage(iterations=5):
-    sizes = [100, 200, 500]  # Removed 1000 for performance
+def analyze_memory_usage(iterations=1):
+    sizes = [100, 200, 300, 400, 500, 1000]  # Removed 1000 for performance
     memory_usage = {algo: [] for algo in ["Dijkstra", "Bellman-Ford", "A*", "Floyd-Warshall", "Johnson's"]}
     
     for size in sizes:
@@ -209,9 +222,7 @@ def analyze_memory_usage(iterations=5):
     plt.title("Algorithm Memory Usage")
     plt.show()
 
-if __name__ == "__main__":
-    num_nodes = 100
-    graph = generate_graph(num_nodes)
-    validate_algorithms()  # Validate using the fixed graph
-    test_scalability(iterations=5)  # Test time complexity with multiple iterations
-    analyze_memory_usage(iterations=5)  # Test space complexity with multiple iterations
+# Main execution
+validate_algorithms()  # Ensure correctness of algorithms
+test_scalability()  # Scalability test
+analyze_memory_usage()  # Memory usage test

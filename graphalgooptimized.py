@@ -189,7 +189,7 @@ def validate_algorithms():
     assert johnson_result[0][3] == 4, "Johnson's algorithm failed validation!"
 
 # Scalability Testing
-def test_scalability(iterations=2):
+def test_scalability(iterations=5):
     sizes = [100, 200, 500]  # Removed 1000 for performance
     times = {algo: [] for algo in ["Dijkstra", "Bellman-Ford", "A*", "Floyd-Warshall", "Johnson's"]}
     
@@ -219,7 +219,7 @@ def measure_memory(func, *args):
     tracemalloc.stop()
     return current, peak
 
-def analyze_memory_usage(iterations=2):
+def analyze_memory_usage(iterations=5):
     sizes = [100, 200, 500]  # Removed 1000 for performance
     memory_usage = {algo: [] for algo in ["Dijkstra", "Bellman-Ford", "A*", "Floyd-Warshall", "Johnson's"]}
     
@@ -252,5 +252,5 @@ if __name__ == "__main__":
     num_nodes = 100
     graph = generate_random_graph(num_nodes)
     validate_algorithms()  # Validate using the fixed graph
-    test_scalability(iterations=2)  # Test time complexity with multiple iterations
-    analyze_memory_usage(iterations=2)  # Test space complexity with multiple iterations
+    test_scalability(iterations=5)  # Test time complexity with multiple iterations
+    analyze_memory_usage(iterations=5)  # Test space complexity with multiple iterations
