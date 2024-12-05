@@ -151,6 +151,7 @@ def validate_algorithms():
 def test_scalability(iterations=1):
     sizes = [100, 200, 300, 400, 500, 1000]  # Increased sizes for better visibility
     times = {algo: [] for algo in ["Dijkstra", "Bellman-Ford", "A*", "Floyd-Warshall", "Johnson's"]}
+    memory_usage = {algo: [] for algo in ["Dijkstra", "Bellman-Ford", "A*", "Floyd-Warshall", "Johnson's"]}
     
     for size in sizes:
         for _ in range(iterations):
@@ -163,26 +164,45 @@ def test_scalability(iterations=1):
                 ("Floyd-Warshall", lambda: floyd_warshall(graph, size)),
                 ("Johnson's", lambda: johnsons_algorithm(graph, size))
             ]:
+                # Measure time
                 start_time = time.perf_counter()
                 func()
                 elapsed_time = time.perf_counter() - start_time
                 times[algo].append(elapsed_time)
                 print(f"{algo} for size {size}: {elapsed_time:.6f} seconds")  # Debug output
-    
+                
+                # Measure memory
+                current, peak = measure_memory(func)
+                memory_usage[algo].append(peak)
+
     # Average the times
     avg_times = {algo: [sum(times[algo][i:i + iterations]) / iterations for i in range(0, len(times[algo]), iterations)] for algo in times}
     
     for algo in avg_times:
         print(f"Average time for {algo}: {avg_times[algo]}")  # Debug output for average times
     
-    for algo in avg_times:
-        plt.plot(sizes, avg_times[algo], label=algo)  # Ensure Dijkstra is plotted
+    # Average the memory usage
+    avg_memory = {algo: [sum(memory_usage[algo][i:i + iterations]) / iterations for i in range(0, len(memory_usage[algo]), iterations)] for algo in memory_usage}
     
+    for algo in avg_memory:
+        print(f"Average memory for {algo}: {avg_memory[algo]}")  # Debug output for average memory usage
+    
+    # Plotting
+    for algo in avg_times:
+        plt.plot(sizes, avg_times[algo], label=f"{algo} Time")  # Ensure Dijkstra is plotted
     plt.xlabel("Number of Nodes")
     plt.ylabel("Average Time (seconds)")
     plt.yscale('log')  # Use logarithmic scale for better visibility
     plt.legend()
-    plt.title("Algorithm Scalability")
+    plt.title("Algorithm Scalability - Time")
+    plt.show()
+
+    for algo in avg_memory:
+        plt.plot(sizes, avg_memory[algo], label=f"{algo} Memory")  # Ensure Dijkstra is plotted
+    plt.xlabel("Number of Nodes")
+    plt.ylabel("Average Memory Usage (bytes)")
+    plt.legend()
+    plt.title("Algorithm Scalability - Memory")
     plt.show()
 
 # Memory Usage Measurement
@@ -213,6 +233,9 @@ def analyze_memory_usage(iterations=1):
     
     # Average the memory usage
     avg_memory = {algo: [sum(memory_usage[algo][i:i + iterations]) / iterations for i in range(0, len(memory_usage[algo]), iterations)] for algo in memory_usage}
+    
+    for algo in avg_memory:
+        print(f"Average memory for {algo}: {avg_memory[algo]}")  # Debug output for average memory usage
     
     for algo in avg_memory:
         plt.plot(sizes, avg_memory[algo], label=algo)
